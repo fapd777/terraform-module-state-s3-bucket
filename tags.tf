@@ -1,5 +1,5 @@
 locals {
   common_tags = merge(var.input_tags, {
-    "ModuleSourceRepo" = "github.com/StratusGrid/terraform-aws-terraform-state-s3-bucket-centralized-with-roles"
+    "ModuleSourceRepo" = "github.com/fapd777/terraform-module-state-s3-bucket"
   })
 }
