@@ -3,10 +3,7 @@ locals {
 }
 
 resource "aws_s3_bucket" "remote_state_backend" {
-  bucket = "${var.name_prefix}-remote-state-backend${var.name_suffix}"
-  lifecycle {
-    prevent_destroy = true
-  }
+  bucket = "${var.name_prefix}-remote-state-backend-${var.name_suffix}"
 
   tags = local.common_tags
 }
@@ -180,4 +177,3 @@ resource "aws_s3_bucket_public_access_block" "this" {
   ignore_public_acls      = var.ignore_public_acls
   restrict_public_buckets = var.restrict_public_buckets
 }
-
