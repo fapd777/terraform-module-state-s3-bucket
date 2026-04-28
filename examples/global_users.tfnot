@@ -1,8 +1,0 @@
-# This should have each terraform state role if you want a user to be able to apply terraform manually
-locals {
-  mycompany_organization_terraform_state_account_roles = [
-    "arn:aws:iam::123456789012:role/210987654321-terraform-state",
-    "arn:aws:iam::123456789012:role/123456789012-terraform-state"
-  ]
-}
-

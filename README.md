@@ -2,122 +2,54 @@
 
 # terraform-module-state-s3-bucket
 
-This is intended to be used by an organization for all of their own accounts. This does not protect access to DynamoDB locking of other accounts, it only restricts access S3 paths for each account.
+## s3-bucket-tfstate.tf example:
 
-This restriction is put in place by creating a unique role for each account, then attaching an assumerole policy that trusts the corresponding account to assume it. You will still need to give permission to assume roles to your users/roles that are used to apply terraform in other accounts, and configure your state appropriately to use this.
-
-All public access is blocked by default.  There are individual parameters which can be set to "false" if public bucket/state access is desired:
-* block_public_acls
-* block_public_policy
-* ignore_public_acls
-* restrict_public_buckets
-
-## Example Config:
+Create an s3-bucket-tfstate.tf file in the Terraform root directory with the following configuration:
 
 ```hcl
-module "terraform_state_backend" {
-  source  = "git::https://github.com/fapd777/terraform-module-state-s3-bucket.git"
+################################################################################
+# Terraform Remote State Amazon S3 Bucket
+################################################################################
 
-  name_prefix   = "mycompany"
-  log_bucket_id = module.s3_bucket_logging.bucket_id
-  account_arns = [
-    "arn:aws:iam::123456789012:root",
-    "arn:aws:iam::098765432109:root"
-  ]
-  global_account_arns = ["arn:aws:iam::123456789012:root"]
-  input_tags          = local.common_tags
-}
-
-output "terraform_state_kms_key_alias_arns" {
-  value = module.terraform_state.kms_key_alias_arns
-}
-
-output "terraform_state_kms_key_arns" {
-  value = module.terraform_state.kms_key_arns
-}
-
-output "terraform_state_iam_role_arns" {
-  value = module.terraform_state.iam_role_arns
+module "terraform_state" {
+  source        = "git::https://github.com/fapd777/terraform-module-state-s3-bucket.git"
+  name_prefix   = var.name_prefix
+  name_suffix   = var.region
+  log_bucket_id = var.logging_bucket
 }
 ```
 
-## Example Backend Config:
+## state.tf example:
+
+Create an state.tf file in the Terraform root directory with the following configuration:
 
 ```hcl
 terraform {
   backend "s3" {
-    role_arn       = "arn:aws:iam::123456789012:role/123456789012-terraform-state"
-    acl            = "bucket-owner-full-control"
-    bucket         = "mycompany-remote-state-backend"
-    dynamodb_table = "mycompany-remote-state-backend"
-    encrypt        = true
-    key            = "123456789012/mycompany-account-organization-master/terraform.tfstate"
-    kms_key_id     = "arn:aws:kms:us-east-1:123456789012:key/4ryh7htp-FAKE-ARNS-DUDE-777d88512345"
-    region         = "us-east-1"
+    acl     = "bucket-owner-full-control"
+    encrypt = true
+    region  = "us-east-2"
   }
 }
-
 ```
 
-## Example to Initialize the backend:
-```
-terraform init -backend-config="access_key=ABCDEFGHIJKLMNOPQR" -backend-config="secret_key=AbcDeFgHIJKlmnOPqRStUVwxyZ"
-```
+## init-tfvars/dev.tfvars example:
 
-NOTE: The access and secret keys used must have rights to assume the role created by the module
-- This is usually automatically the case for any keys that have full admin rights in the account whose state is to be stored, or in one of the global accounts specified.
-- Otherwise, this will need to be assigned manually.
-- Use trusting_arn to map a single trust (like for a standard account assumption policy)
-- Use trusting_arns to map multiple trusts (like for a global account assumption policy)
-
-## Example Configuration on Global Users Account:
+Create an dev.tfvars file in the Terraform init-tfvars directory with the following configuration:
 
 ```hcl
-# This should have each terraform state role if you want a user to be able to apply terraform manually
-locals {
-  mycompany_organization_terraform_state_account_roles = [
-    "arn:aws:iam::123456789012:role/210987654321-terraform-state",
-    "arn:aws:iam::123456789012:role/123456789012-terraform-state"
-  ]
-}
-
+# These variables are called when running the following command:
+# terraform init -backend-config=./init-tfvars/dev.tfvars
+bucket         = "aws-s3-service-remote-state-backend-us-east-2"
+key            = "aws-s3-service-dev-remote-state-backend.tfstate"
+dynamodb_table = "aws-s3-service-remote-state-backend-us-east-2"
+kms_key_id     = "arn:aws:kms:us-east-2:1234567890AB:key/12345678-90AB-CDEF-GHIJ-KLMNOPQRSTYWXYZ"
 ```
 
-## Example config without trusting any other accounts
-In this case, you just don't specific other accounts. Then, you use the default kms key along with the dynamodb table.
 
-```hcl
-module "terraform_state" {
-  source  = "git::https://github.com/fapd777/terraform-module-state-s3-bucket.git"
-
-  name_prefix = var.name_prefix
-  name_suffix = local.name_suffix
-
-  log_bucket_id                       = module.s3_bucket_logging.bucket_id
-  log_bucket_target_prefix            = "s3/"
-  log_bucket_target_object_key_format = {
-    partitioned_prefix = {
-      partition_date_source = "EventTime"
-    }
-  }
-
-  account_arns        = []
-  global_account_arns = []
-
-  dynamodb_table_billing_type   = "PROVISIONED"
-  dynamodb_table_read_capacity  = 1
-  dynamodb_table_write_capacity = 1
-
-  input_tags = merge(local.common_tags, {})
-}
-
-output "terraform_state_kms_key_alias_arn" {
-  value = module.terraform_state.kms_default_key_alias_arn
-}
-
-output "terraform_state_kms_key_arn" {
-  value = module.terraform_state.kms_default_key_arn
-}
+## How to initialize the backend:
+```
+terraform init -backend-config=./init-tfvars/dev.tfvars
 ```
 
 ---

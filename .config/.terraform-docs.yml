@@ -7,51 +7,55 @@ name: terraform-module-state-s3-bucket
 content: |-
 
   # terraform-module-state-s3-bucket
+  
+  ## s3-bucket-tfstate.tf example:
 
-  This is intended to be used by an organization for all of their own accounts. This does not protect access to DynamoDB locking of other accounts, it only restricts access S3 paths for each account.
-  
-  This restriction is put in place by creating a unique role for each account, then attaching an assumerole policy that trusts the corresponding account to assume it. You will still need to give permission to assume roles to your users/roles that are used to apply terraform in other accounts, and configure your state appropriately to use this.
-  
-  All public access is blocked by default.  There are individual parameters which can be set to "false" if public bucket/state access is desired:
-  * block_public_acls
-  * block_public_policy
-  * ignore_public_acls
-  * restrict_public_buckets
-  
-  ## Example Config:
+  Create an s3-bucket-tfstate.tf file in the Terraform root directory with the following configuration:
 
   ```hcl
-  {{ include "examples/with_trusted_accounts.tfnot" }}
+  ################################################################################
+  # Terraform Remote State Amazon S3 Bucket
+  ################################################################################
+
+  module "terraform_state" {
+    source        = "git::https://github.com/fapd777/terraform-module-state-s3-bucket.git"
+    name_prefix   = var.name_prefix
+    name_suffix   = var.region
+    log_bucket_id = var.logging_bucket
+  }
   ```
   
-  ## Example Backend Config:
+  ## state.tf example:
+
+  Create an state.tf file in the Terraform root directory with the following configuration:
 
   ```hcl
-  {{ include "examples/backend_config.tfnot" }}
+  terraform {
+    backend "s3" {
+      acl     = "bucket-owner-full-control"
+      encrypt = true
+      region  = "us-east-2"
+    }
+  }
   ```
 
-  ## Example to Initialize the backend:
-  ```
-  terraform init -backend-config="access_key=ABCDEFGHIJKLMNOPQR" -backend-config="secret_key=AbcDeFgHIJKlmnOPqRStUVwxyZ"
+  ## init-tfvars/dev.tfvars example:
+
+  Create an dev.tfvars file in the Terraform init-tfvars directory with the following configuration:
+
+  ```hcl
+  # These variables are called when running the following command:
+  # terraform init -backend-config=./init-tfvars/dev.tfvars
+  bucket         = "aws-s3-service-remote-state-backend-us-east-2"
+  key            = "aws-s3-service-dev-remote-state-backend.tfstate"
+  dynamodb_table = "aws-s3-service-remote-state-backend-us-east-2"
+  kms_key_id     = "arn:aws:kms:us-east-2:1234567890AB:key/12345678-90AB-CDEF-GHIJ-KLMNOPQRSTYWXYZ"
   ```
 
-  NOTE: The access and secret keys used must have rights to assume the role created by the module
-  - This is usually automatically the case for any keys that have full admin rights in the account whose state is to be stored, or in one of the global accounts specified.
-  - Otherwise, this will need to be assigned manually.
-  - Use trusting_arn to map a single trust (like for a standard account assumption policy)
-  - Use trusting_arns to map multiple trusts (like for a global account assumption policy)
   
-  ## Example Configuration on Global Users Account:
-
-  ```hcl
-  {{ include "examples/global_users.tfnot" }}
+  ## How to initialize the backend:
   ```
-  
-  ## Example config without trusting any other accounts
-  In this case, you just don't specific other accounts. Then, you use the default kms key along with the dynamodb table.
-
-  ```hcl
-  {{ include "examples/no_trusted_accounts.tfnot" }}
+  terraform init -backend-config=./init-tfvars/dev.tfvars
   ```
 
   ---
