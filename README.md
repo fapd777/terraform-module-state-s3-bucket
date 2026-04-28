@@ -26,12 +26,12 @@ module "terraform_state" {
   log_bucket_id = var.logging_bucket
 }
 ```
-## 2. Execute Terraform apply to create the S3 bucket, Dynamo table, and KMS key:
+## 2. Execute Terraform apply to create the S3 bucket, Dynamo DB table, and KMS key:
 
 ```bash
 terraform apply -var-file ./apply-tfvars/dev.tfvars
 ```
-## 3. Keep a record of the following outputs from Terraform applying the module:
+## 3. Keep a record of the following outputs resulting from Terraform applying the module:
 
 ```hcl
 terraform_state_bucket = "aws-s3-service-remote-state-backend-us-east-2"
@@ -40,9 +40,9 @@ terraform_state_dynamodb_table = "aws-s3-service-remote-state-backend-us-east-2"
 terraform_state_kms_key_arn = "arn:aws:kms:us-east-2:1234567890AB:key/12345678-90AB-CDEF-GHIJ-KLMNOPQRSTYWXYZ"
 ```
 
-## 4. Create the init-tfvars/dev.tfvars and state.tf files::
+## 4. Create the init-tfvars/dev.tfvars and state.tf files:
 
-Create an dev.tfvars file in the Terraform init-tfvars directory with the following configuration:
+Use the outputs from the previous step to create a dev.tfvars file in the Terraform init-tfvars directory with the following configuration:
 
 ```hcl
 # These variables are called when running the following command:
@@ -71,9 +71,9 @@ terraform {
 terraform init -backend-config=./init-tfvars/dev.tfvars
 ```
 
-```
 Answer "yes" to the following prompt:
 
+```
 Initializing the backend...
 Do you want to copy existing state to the new backend?
   Pre-existing state was found while migrating the previous "local" backend to the
