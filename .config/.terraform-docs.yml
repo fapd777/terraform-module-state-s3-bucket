@@ -7,8 +7,16 @@ name: terraform-module-state-s3-bucket
 content: |-
 
   # terraform-module-state-s3-bucket
+
+  This repository holds a Terraform module that creates:
+
+  * An S3 bucket for storing Terraform state.
+  * A Dynamo DB table to avoid Terraform state writing conflict for multiple users.
+  * A KMS key used by Dynamo DB.
+
+  Follow the next steps to set up the S3 bucket for the remote Terraform state in the caller Terraform repository:
   
-  ## s3-bucket-tfstate.tf example:
+  ## 1. Create the s3-bucket-tfstate.tf file:
 
   Create an s3-bucket-tfstate.tf file in the Terraform root directory with the following configuration:
 
@@ -24,8 +32,32 @@ content: |-
     log_bucket_id = var.logging_bucket
   }
   ```
+  ## 2. Execute Terraform apply to create the S3 bucket, Dynamo table, and KMS key:
+
+  ```bash
+  terraform apply -var-file ./apply-tfvars/dev.tfvars
+  ```
+  ## 3. Keep a record of the following outputs from Terraform applying the module:
+
+  ```hcl
+  terraform_state_bucket = "aws-s3-service-remote-state-backend-us-east-2"
+  terraform_state_config_s3_key = "aws-s3-service-dev-remote-state-backend.tfstate"
+  terraform_state_dynamodb_table = "aws-s3-service-remote-state-backend-us-east-2"
+  terraform_state_kms_key_arn = "arn:aws:kms:us-east-2:1234567890AB:key/12345678-90AB-CDEF-GHIJ-KLMNOPQRSTYWXYZ"
+  ```
   
-  ## state.tf example:
+  ## 4. Create the init-tfvars/dev.tfvars and state.tf files::
+
+  Create an dev.tfvars file in the Terraform init-tfvars directory with the following configuration:
+
+  ```hcl
+  # These variables are called when running the following command:
+  # terraform init -backend-config=./init-tfvars/dev.tfvars
+  bucket         = "aws-s3-service-remote-state-backend-us-east-2"
+  key            = "aws-s3-service-dev-remote-state-backend.tfstate"
+  dynamodb_table = "aws-s3-service-remote-state-backend-us-east-2"
+  kms_key_id     = "arn:aws:kms:us-east-2:1234567890AB:key/12345678-90AB-CDEF-GHIJ-KLMNOPQRSTYWXYZ"
+  ```
 
   Create an state.tf file in the Terraform root directory with the following configuration:
 
@@ -39,23 +71,23 @@ content: |-
   }
   ```
 
-  ## init-tfvars/dev.tfvars example:
+  ## 5. Initialize the Terraform backend to move the state from local to S3:
 
-  Create an dev.tfvars file in the Terraform init-tfvars directory with the following configuration:
-
-  ```hcl
-  # These variables are called when running the following command:
-  # terraform init -backend-config=./init-tfvars/dev.tfvars
-  bucket         = "aws-s3-service-remote-state-backend-us-east-2"
-  key            = "aws-s3-service-dev-remote-state-backend.tfstate"
-  dynamodb_table = "aws-s3-service-remote-state-backend-us-east-2"
-  kms_key_id     = "arn:aws:kms:us-east-2:1234567890AB:key/12345678-90AB-CDEF-GHIJ-KLMNOPQRSTYWXYZ"
-  ```
-
-  
-  ## How to initialize the backend:
-  ```
+  ```bash
   terraform init -backend-config=./init-tfvars/dev.tfvars
+  ```
+  
+  ```
+  Answer "yes" to the following prompt:
+
+  Initializing the backend...
+  Do you want to copy existing state to the new backend?
+    Pre-existing state was found while migrating the previous "local" backend to the
+    newly configured "s3" backend. No existing state was found in the newly
+    configured "s3" backend. Do you want to copy this state to the new "s3"
+    backend? Enter "yes" to copy and "no" to start with an empty state.
+
+    Enter a value: 
   ```
 
   ---
