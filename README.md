@@ -12,7 +12,7 @@ Follow the next steps to set up the S3 bucket for the remote Terraform state in 
 
 ## 1. Create the s3-bucket-tfstate.tf file:
 
-Create an s3-bucket-tfstate.tf file in the Terraform root directory with the following configuration:
+Create an `s3-bucket-tfstate.tf` file in the Terraform root directory with the following configuration:
 
 ```hcl
 ################################################################################
@@ -45,7 +45,7 @@ terraform_state_kms_key_arn = "arn:aws:kms:us-east-2:1234567890AB:key/12345678-9
 
 ## 4. Create the init-tfvars/dev.tfvars and state.tf files:
 
-Use the outputs from the previous step to create a dev.tfvars file in the Terraform init-tfvars directory with the following configuration:
+Use the outputs from the previous step to create a `dev.tfvars` file in the Terraform `init-tfvars` directory with the following configuration:
 
 ```hcl
 # These variables are called when running the following command:
@@ -56,7 +56,7 @@ dynamodb_table = "aws-s3-service-remote-state-backend-us-east-2"
 kms_key_id     = "arn:aws:kms:us-east-2:1234567890AB:key/12345678-90AB-CDEF-GHIJ-KLMNOPQRSTYWXYZ"
 ```
 
-Create an state.tf file in the Terraform root directory with the following configuration:
+Create an `state.tf` file in the Terraform root directory with the following configuration:
 
 ```hcl
 terraform {
@@ -74,7 +74,7 @@ terraform {
 terraform init -backend-config=./init-tfvars/dev.tfvars
 ```
 
-Answer "yes" to the following prompt:
+Answer `yes` to the following prompt:
 
 ```
 Initializing the backend...
