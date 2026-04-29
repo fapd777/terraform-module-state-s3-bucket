@@ -26,7 +26,7 @@ module "terraform_state" {
   log_bucket_id = var.logging_bucket
 }
 ```
-You can create an S3 bucket for logging purposes using the following Terraform module:
+You can create an S3 bucket for logging purposes using the following Terraform module:  
 https://github.com/fapd777/terraform-module-s3-bucket-logging
 
 ## 2. Execute Terraform apply to create the S3 bucket, Dynamo DB table, and KMS key:
