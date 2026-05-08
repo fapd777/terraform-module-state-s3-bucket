@@ -20,12 +20,14 @@ Create an `s3-bucket-tfstate.tf` file in the Terraform root directory with the f
 ################################################################################
 
 module "terraform_state" {
-  source        = "git::https://github.com/fapd777/terraform-module-state-s3-bucket.git"
+  source        = "git::https://github.com/fapd777/terraform-module-state-s3-bucket.git?ref=v20260508"
   name_prefix   = var.name_prefix
   name_suffix   = var.region
   log_bucket_id = var.logging_bucket
 }
 ```
+Set the `ref` parameter at the end of the source URL with the latest version of the Terraform module.
+
 You can create an S3 bucket for logging purposes using the following Terraform module:  
 https://github.com/fapd777/terraform-module-s3-bucket-logging
 
