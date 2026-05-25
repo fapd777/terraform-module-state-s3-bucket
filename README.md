@@ -20,7 +20,7 @@ Create an `s3-bucket-tfstate.tf` file in the Terraform root directory with the f
 ################################################################################
 
 module "terraform_state" {
-  source        = "git::https://github.com/fapd777/terraform-module-state-s3-bucket.git?ref=v20260508"
+  source        = "git::https://github.com/fapd777/terraform-module-state-s3-bucket.git?ref=v26.5.1"
   name_prefix   = var.name_prefix
   name_suffix   = var.region
   log_bucket_id = var.logging_bucket
@@ -94,7 +94,7 @@ Do you want to copy existing state to the new backend?
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_dynamodb_table.remote_state_backend](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table) | resource |
 | [aws_iam_policy.account_state_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.account_state_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -113,7 +113,7 @@ Do you want to copy existing state to the new backend?
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_account_arns"></a> [account\_arns](#input\_account\_arns) | Arns for accounts / roles in accounts which are given a role they are able to assume to access their state. | `list(string)` | `[]` | no |
 | <a name="input_aws_s3_bucket_server_side_encryption_type"></a> [aws\_s3\_bucket\_server\_side\_encryption\_type](#input\_aws\_s3\_bucket\_server\_side\_encryption\_type) | Selection of the bucket encryption type | `string` | `"SSE_KMS"` | no |
 | <a name="input_block_public_acls"></a> [block\_public\_acls](#input\_block\_public\_acls) | Blocks public ACLs on the bucket. | `bool` | `true` | no |
@@ -134,7 +134,7 @@ Do you want to copy existing state to the new backend?
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_bucket"></a> [bucket](#output\_bucket) | bucket friendly name |
 | <a name="output_dynamodb_table"></a> [dynamodb\_table](#output\_dynamodb\_table) | dynamodb friendly name |
 | <a name="output_iam_role_arns"></a> [iam\_role\_arns](#output\_iam\_role\_arns) | arns for each IAM role that can be assumend for the corresponding account's terraform state |
